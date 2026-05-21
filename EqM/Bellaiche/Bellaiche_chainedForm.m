@@ -12,27 +12,24 @@ n=4;
 %% Erstellen von X1 und X2
 % l = sym('l','real');
 % l_t=sym('l_t','real');
-l=1
-l_t=1
-R = sym('R','real');
 
 syms x1 x2 x3 x4;
 % x y theta gama
 
 %inputs v und gamma_dot
 %Erstellen von X1
-X1_1= cos(x3);
-X1_2= sin(x3);
-X1_3= sin(x4)/(l_t + l*cos(x4));
-X1_4= 0;
+X1_1= 1;
+X1_2= 0;
+X1_3= x2;
+X1_4= x3;
 
 X1_vorher=[X1_1;X1_2;X1_3;X1_4];
 
 %Erstellen von X2
 X2_1= 0;
-X2_2= 0;
-X2_3= l_t/(l_t + l*cos(x4));
-X2_4= 1;
+X2_2= 1;
+X2_3= 0;
+X2_4= 0;
 
 % %inputs phi_dot und gamma_dot
 % %Erstellen von X1
@@ -84,6 +81,8 @@ X4=ad_fng(:,2);
 ad_fng=liebracket(X2,X3,x,1);
 X5=ad_fng(:,2);
 
+% simplify(det([X1 X2 X3 X4])) %for LARC
+
 %% liebrackets ebenso an p=zeros(6,1) auswerten
 X30=subs(X3,[x1 x2 x3 x4],[p(1) p(2) p(3) p(4)]);
 X40=subs(X4,[x1 x2 x3 x4],[p(1) p(2) p(3) p(4)]);
@@ -120,14 +119,14 @@ X4_y=subs(X4,[x1 x2 x3 x4],[x_von_y.x1 x_von_y.x2 x_von_y.x3 x_von_y.x4]);
 syms Y1 Y2
 Y1=sym(zeros(n,1));
 Y2=sym(zeros(n,1));
-for ii=1:n
-    y_zeile=y_von_x(ii);
-    %jetzt die Abletung von y_zeile berechnen und damit die Einträge von Y1 und Y2 erhalten:
-    Y1_zeile=subs(y_zeile,[x1 x2 x3 x4],[X1_y(1) X1_y(2) X1_y(3) X1_y(4)]); 
-    Y2_zeile=subs(y_zeile,[x1 x2 x3 x4],[X2_y(1) X2_y(2) X2_y(3) X2_y(4)]);
-    Y1(ii,1)=Y1_zeile;
-    Y2(ii,1)=Y2_zeile;
-end
+
+DyDx = jacobian(y_von_x, [x1 x2 x3 x4]);
+Y1_x = simplify(DyDx * X1);
+Y2_x = simplify(DyDx * X2);
+x_von_y_vec = y_von_x';
+
+Y1 = simplify(subs(Y1_x, [x1 x2 x3 x4], x_von_y_vec));
+Y2 = simplify(subs(Y2_x, [x1 x2 x3 x4], x_von_y_vec));
 
 %Bestimmung von Y3 Y4 Y5 Y6
 %X3=[X1,X2]
@@ -207,23 +206,14 @@ X4_z=subs(X4,[x1 x2 x3 x4],[x_von_z.x1 x_von_z.x2 x_von_z.x3 x_von_z.x4]);
 syms Z1 Z2
 Z1=sym(zeros(n,1));
 Z2=sym(zeros(n,1));
-for ii=1:n
-    z_zeile=z_von_x(ii); %Produktregel?! Z1 und Z2 stimmen nicht!
-    %jetzt die Abletung von z_zeile berechnen und damit die Einträge von Y1 und Y2 erhalten:
-    Z1_zeile=subs(z_zeile,[x1 x2 x3 x4],[X1_z(1) X1_z(2) X1_z(3) X1_z(4)]); 
-    Z2_zeile=subs(z_zeile,[x1 x2 x3 x4],[X2_z(1) X2_z(2) X2_z(3) X2_z(4)]);
 
-    DzDx = jacobian(z_von_x, xvars);
-    Z1_x = simplify(DzDx * X1);
-    Z2_x = simplify(DzDx * X2);
-    x_von_z_vec = [x_von_z.x1 x_von_z.x2 x_von_z.x3 x_von_z.x4];
+DzDx = jacobian(z_von_x, [x1 x2 x3 x4]);
+Z1_x = simplify(DzDx * X1);
+Z2_x = simplify(DzDx * X2);
+x_von_z_vec = [x_von_z.x1 x_von_z.x2 x_von_z.x3 x_von_z.x4];
 
-    Z1 = simplify(subs(Z1_x, xvars, x_von_z_vec));
-    Z2 = simplify(subs(Z2_x, xvars, x_of_z));
-
-    Z1(ii,1)=Z1_zeile;
-    Z2(ii,1)=Z2_zeile;
-end
+Z1 = simplify(subs(Z1_x, [x1 x2 x3 x4], x_von_z_vec));
+Z2 = simplify(subs(Z2_x, [x1 x2 x3 x4], x_von_z_vec));
 
 %Bestimmung von Z3 Z4 Z5 Z6
 %X3=[X1,X2]
@@ -338,6 +328,11 @@ Z1_taylor_1=taylor(Z1(1),[z1 z2 z3 z4],[0 0 0 0],'Order', 4) %dann bis Terme hoc
 Z1_taylor_2=taylor(Z1(2),[z1 z2 z3 z4],[0 0 0 0],'Order', 4)
 Z1_taylor_3=taylor(Z1(3),[z1 z2 z3 z4],[0 0 0 0],'Order', 4)
 Z1_taylor_4=taylor(Z1(4),[z1 z2 z3 z4],[0 0 0 0],'Order', 4)
+
+Z2_taylor_1=taylor(Z2(1),[z1 z2 z3 z4],[0 0 0 0],'Order', 4) %dann bis Terme hoch 3
+Z2_taylor_2=taylor(Z2(2),[z1 z2 z3 z4],[0 0 0 0],'Order', 4)
+Z2_taylor_3=taylor(Z2(3),[z1 z2 z3 z4],[0 0 0 0],'Order', 4)
+Z2_taylor_4=taylor(Z2(4),[z1 z2 z3 z4],[0 0 0 0],'Order', 4)
 
 %% verify that it is truly nilpotent
 Z1_n=[1;0;-z2;-z3];

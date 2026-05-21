@@ -10,40 +10,53 @@ classdef ArticulatedVehicleCollapsed
         axisLengthTrailer
         l %robot to joint
         l_t %joint to trailer
+        tractor
     end
 
     methods
-        function obj = ArticulatedVehicleCollapsed(name)
+        function obj = ArticulatedVehicleCollapsed(name,tractor)
             obj.Name = name;
 
             % Map für Modelle
             obj.AvailableModels = containers.Map('KeyType', 'char', 'ValueType', 'any');
             
-            data_config = load('EqM/results/config.mat');
-            obj.axisLength = data_config.L_val;
-            obj.axisLengthTrailer = data_config.Lt_val;
-            obj.l = data_config.l_val;
-            obj.l_t = data_config.l_t_val;
+            data_config = load('EqM/results/config.mat');            
+            obj.tractor = tractor;
+            if obj.tractor
+                obj.l = data_config.l1_tractor_val;
+                obj.l_t = data_config.l2_tractor_val;
+                obj.axisLength = data_config.L_tractor_val;
+                obj.axisLengthTrailer = data_config.Lt_tractor_val;
+            else
+                obj.l = data_config.l_val;
+                obj.l_t = data_config.l_t_val;
+                obj.axisLength = data_config.L_val;
+                obj.axisLengthTrailer = data_config.Lt_val;
+            end            
 
             % Modelle hinzufügen
             obj = obj.initializeModels();
         
             % Standardmodell setzen
             modelNames = keys(obj.AvailableModels);
-            obj.ActiveModelName = modelNames{1};
+            obj.ActiveModelName = modelNames{1};            
         end
 
         function obj = initializeModels(obj)
             data = load('EqM/results/EqM_articulatedVehicleCollapsed.mat');
-            data_config = load('EqM/results/config.mat'); %!!! muss zu EqM passen!
-            b1x = data_config.b1x_val;
+            data_config = load('EqM/results/config.mat'); %!!! muss zu EqM passen!            
             
-            %% Kinematics
+            %% Kinematics            
             stateNames = ["x" "y" "theta" "gamma" "phi_l" "phi_1_t"];
             inputNames = ["v" "gama_dot"];
-            f = @(y,u) data.G_y_func_v_omega(y) * u; %x_dot = f(x,u)            
-            uMax = [0.4; pi/8];
-            uMin = -uMax;
+            f = @(y,u) data.G_y_func_v_omega(y) * u; %x_dot = f(x,u)
+            if obj.tractor
+                uMax = [1.5; pi/8];
+                uMin = -uMax;
+            else
+                uMax = [0.4; pi/8];
+                uMin = -uMax;
+            end
             nx = 6;
             nu = 2;
             constraints = ConstraintSet(obj, nx, nu, uMin, uMax);
@@ -64,7 +77,7 @@ classdef ArticulatedVehicleCollapsed
             
             stateNames = ["x" "y" "theta" "gamma" "phi_l" "phi_1_t"];
             inputNames = ["phi_dot" "gama_dot"];
-            f = @(y,u) data.G_y_func(y) * u; %x_dot = f(x,u)            
+            f = @(y,u) data.G_y_func(y) * u; %x_dot = f(x,u)
             uMax = 10*ones(2,1);
             uMin = -uMax;
             nx = 6;
@@ -88,8 +101,13 @@ classdef ArticulatedVehicleCollapsed
             inputNames = ["tau_wheel" "tau_gama"];
             f_kin = @(y,u) data.G_y_func(y) * [y(7);y(8)];            
             f = @(y,u) [f_kin(y,u);data.Minv_eqM_func(y)*data.q_eqM_func([y; u])];
-            uMax = 0.02*ones(2,1);
-            uMin = -uMax;
+            if obj.tractor
+                uMax = 2*ones(2,1);
+                uMin = -uMax;
+            else
+                uMax = 0.02*ones(2,1);
+                uMin = -uMax;
+            end
             nx = 8;
             nu = 2;
             constraints = ConstraintSet(obj, nx, nu, uMin, uMax);
@@ -112,12 +130,19 @@ classdef ArticulatedVehicleCollapsed
             inputNames = ["tau_l" "tau_gama"];
             f_kin = @(y,u) data.G_y_func_v_omega(y) * [y(7);y(8)];            
             f = @(y,u) [f_kin(y,u);data.Minv_eqM_func_vw(y)*data.q_eqM_func_vw([y; u])];
-            uMax = 0.005*ones(2,1);
-            uMin = -uMax;
+            costParams = [];
+            if obj.tractor
+                uMax = 2*ones(2,1);
+                uMin = -uMax;
+                costParams.q_u = 0.001*ones(2,1);
+            else
+                uMax = 0.02*ones(2,1);
+                uMin = -uMax;
+                costParams.q_u = 1*ones(2,1);
+            end
             nx = 8;
             nu = 2;
-            constraints = ConstraintSet(obj, nx, nu, uMin, uMax);
-            costParams = [];
+            constraints = ConstraintSet(obj, nx, nu, uMin, uMax);            
             l = obj.l;
             l_t = obj.l_t;
             costParams.z = [1 0         0               0     0 0 0 0;... %x1=z1
@@ -128,8 +153,7 @@ classdef ArticulatedVehicleCollapsed
                             zeros(1,8);...
                             0 0 0 0 0 0 1 0;...
                             0 0 0 0 0 0 0 1];
-            costParams.q_z = [0.1 0.1 5 5 0 0 0.125*ones(1,2)]';
-            costParams.q_u = 1*ones(2,1);
+            costParams.q_z = [0.1 0.1 5 5 0 0 0.125*ones(1,2)]';            
             costParams.r = [1 1 2 3 1 1 1 1];
             costParams.d = prod(costParams.r);
             dynamics_vw = Model('dynamics_vw', f, constraints, costParams,nx,nu, stateNames, inputNames);

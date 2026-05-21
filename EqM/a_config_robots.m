@@ -53,6 +53,29 @@ I_wcarz_val = mcar_val*(3*Rcar_val^2 + 0.01^2)/12; % wheel inertia around z-axis
 % I_wcary_val = nan;
 % I_wcarz_val = 0.005; % wheel inertia around z-axis in kg m^2
 
+%% articulated vehicle
+M_tractor_val = 40; % chassis in kg
+L_tractor_val = 0.8; % axis length in m
+I_cz_tractor_val = (1.2^2+0.8^2)*M_tractor_val/12; % chassis inertia around z-axis in kg m^2
+I_cx_tractor_val = nan;
+I_cy_tractor_val = nan;
+l1_tractor_val = 1;
+
+m_tractor_val = 2; % wheel mass in kg
+R_tractor_val = 0.32; % wheel radius in m
+h_tractor_val = 0.08; % cylinder height
+I_wx_tractor_val = m_tractor_val*(3*R_tractor_val^2 + h_tractor_val^2)/12; % wheel inertia around x-axis in kg m^2
+I_wy_tractor_val = 0.5*m_tractor_val*R_tractor_val^2;
+I_wz_tractor_val = m_tractor_val*(3*R_tractor_val^2 + h_tractor_val^2)/12; % wheel inertia around z-axis in kg m^2
+
+% trailer
+Mt_tractor_val = 60; % trailer chassis in kg
+Lt_tractor_val = L_tractor_val; % trailer axis length in m
+I_tx_tractor_val = nan;
+I_ty_tractor_val = nan;
+I_tz_tractor_val = Mt_tractor_val*(1.2^2+0.8^2)/12; % chassis inertia around z-axis in kg m^2
+l2_tractor_val = 1;
+
 %%
 robot.robot_type = robot_type;
 robot.R = R_val;

@@ -5,12 +5,12 @@ addpath(genpath(pwd));
 %% user params
 dT = 0.25;
 
-save_results = 1;
-store_git_info = 1;
-save_video = 1;
+save_results = 0;
+store_git_info = 0;
+save_video = 0;
 
 % choose the vehicle
-vehicle = ArticulatedVehicleCollapsed('artVeh');
+vehicle = ArticulatedVehicleCollapsed('artVeh',true); %true for tractor
 % vehicle = ArticulatedVehicle('artVeh');
 % vehicle = Trailer('trailer');
 % vehicle = Robot('DIANA');
@@ -80,10 +80,10 @@ x = simulator.simulate(x0, u);
 
 
 %% MPC
-horizon = 100; %100
+horizon = 100; %150
 mpcController = MPCController(vehicle, dT, horizon);
 
-k_sim = 200; %200
+k_sim = 400; %200
 [x,u,cost] = simulator.sim_MPC_closedLoop(x0, k_sim,mpcController);
 
 % %% postprocessing
