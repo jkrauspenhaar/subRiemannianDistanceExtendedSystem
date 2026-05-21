@@ -5,9 +5,9 @@ addpath(genpath(pwd));
 %% user params
 dT = 0.25;
 
-save_results = 0;
-store_git_info = 0;
-save_video = 0;
+save_results = 1;
+store_git_info = 1;
+save_video = 1;
 
 % choose the vehicle
 vehicle = ArticulatedVehicleCollapsed('artVeh',true); %true for tractor
