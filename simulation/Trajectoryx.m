@@ -41,7 +41,7 @@ classdef Trajectoryx < Trajectory
             else
                 [~, git_hash] = system('git rev-parse --short HEAD');
                 git_hash = strtrim(git_hash);
-                data2pgftable('results/Trajectoryx.txt', data, 'git_hash',git_hash,'skip',skip);
+                data2pgftable(strcat('results/Trajectoryx','_',join(obj.stateNames,"_"),'.txt'), data, 'git_hash',git_hash,'skip',skip);
             end
         end
 
