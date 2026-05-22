@@ -47,7 +47,7 @@ elseif isa(vehicle,'ArticulatedVehicleCollapsed')
     if startsWith(modelname, 'dynamics')
         %x y theta gamma phi phi_t phi1_dot gama_dot ODER
         %x y theta gamma phi phi_t v gama_dot 
-        x0 = [-0.6; -0.75; 0; 0; 0; 0; 0; 0];
+        x0 = [-2; -2; 0; 0; 0; 0; 0; 0];
     else
         x0 = [-0.6; -0.75; 0; 0; 0; 0];
     end    
@@ -71,20 +71,23 @@ vehicle = vehicle.setModel(modelname);
 simulator = Simulator(vehicle.getModel(), dT);
 
 
-%% open-loop simulation
-% U_data = repmat([0.00003 0], 100, 1);
-U_data = repmat([0 0.00005], 100, 1); %Gelenk wird aktuiert in positive Richtung
-% U_data = repmat([-0.00003 -0.0001], 100, 1); %gegensätzliche Bewegung
-u = Trajectoryu(dT, U_data,vehicle.getModel().inputNames, 0);
-x = simulator.simulate(x0, u);
+% %% open-loop simulation
+% % U_data = repmat([0.00003 0], 100, 1);
+% U_data = repmat([0 0.00005], 100, 1); %Gelenk wird aktuiert in positive Richtung
+% % U_data = repmat([-0.00003 -0.0001], 100, 1); %gegensätzliche Bewegung
+% u = Trajectoryu(dT, U_data,vehicle.getModel().inputNames, 0);
+% x = simulator.simulate(x0, u);
 
 
 %% MPC
 horizon = 100; %150
 mpcController = MPCController(vehicle, dT, horizon);
 
-k_sim = 400; %200
+k_sim = 400; %400
 [x,u,cost] = simulator.sim_MPC_closedLoop(x0, k_sim,mpcController);
+xt = vehicle.compute_xt(x);
+figure();
+plot(xt.X(:,1),xt.X(:,2))
 
 % %% postprocessing
 % % VISUAlIZER
@@ -99,6 +102,7 @@ visualizer.plotCosts(cost);
 if save_results == 1    
     skip = 1;
     x.saveTable(skip,store_git_info);
+    xt.saveTable(skip,store_git_info);
     u.saveTable(skip,store_git_info);
     cost.saveTable(skip,store_git_info);
 end

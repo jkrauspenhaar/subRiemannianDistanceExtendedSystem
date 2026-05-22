@@ -21,12 +21,16 @@ classdef ArticulatedVehicleCollapsed
             obj.AvailableModels = containers.Map('KeyType', 'char', 'ValueType', 'any');
             
             data_config = load('EqM/results/config.mat');            
-            obj.tractor = tractor;
-            if obj.tractor
+            obj.tractor.bool = tractor;
+            if obj.tractor.bool
                 obj.l = data_config.l1_tractor_val;
                 obj.l_t = data_config.l2_tractor_val;
                 obj.axisLength = data_config.L_tractor_val;
                 obj.axisLengthTrailer = data_config.Lt_tractor_val;
+                obj.tractor.width_tractor = data_config.width_tractor_val;
+                obj.tractor.length_tractor = data_config.length_tractor_val;
+                obj.tractor.widtht_tractor = data_config.widtht_tractor_val;
+                obj.tractor.lengtht_tractor = data_config.lengtht_tractor_val;
             else
                 obj.l = data_config.l_val;
                 obj.l_t = data_config.l_t_val;
@@ -50,7 +54,7 @@ classdef ArticulatedVehicleCollapsed
             stateNames = ["x" "y" "theta" "gamma" "phi_l" "phi_1_t"];
             inputNames = ["v" "gama_dot"];
             f = @(y,u) data.G_y_func_v_omega(y) * u; %x_dot = f(x,u)
-            if obj.tractor
+            if obj.tractor.bool
                 uMax = [1.5; pi/8];
                 uMin = -uMax;
             else
@@ -101,7 +105,7 @@ classdef ArticulatedVehicleCollapsed
             inputNames = ["tau_wheel" "tau_gama"];
             f_kin = @(y,u) data.G_y_func(y) * [y(7);y(8)];            
             f = @(y,u) [f_kin(y,u);data.Minv_eqM_func(y)*data.q_eqM_func([y; u])];
-            if obj.tractor
+            if obj.tractor.bool
                 uMax = 2*ones(2,1);
                 uMin = -uMax;
             else
@@ -131,7 +135,7 @@ classdef ArticulatedVehicleCollapsed
             f_kin = @(y,u) data.G_y_func_v_omega(y) * [y(7);y(8)];            
             f = @(y,u) [f_kin(y,u);data.Minv_eqM_func_vw(y)*data.q_eqM_func_vw([y; u])];
             costParams = [];
-            if obj.tractor
+            if obj.tractor.bool
                 uMax = 2*ones(2,1);
                 uMin = -uMax;
                 costParams.q_u = 0.001*ones(2,1);
@@ -176,6 +180,15 @@ classdef ArticulatedVehicleCollapsed
 
         function config = getModel(obj)
             config = obj.AvailableModels(char(obj.ActiveModelName));
+        end
+
+        function xt = compute_xt(obj,x)
+            xt_thetat = x.X(:,3)-x.X(:,4); %gamma=theta-theta_T --> theta_T = theta-gamma
+            xt_x = x.X(:,1)-obj.l*cos(x.X(:,3))-obj.l_t*cos(xt_thetat);
+            xt_y = x.X(:,2)-obj.l*sin(x.X(:,3))-obj.l_t*sin(xt_thetat);
+
+            stateNames = ["xt" "yt" "thetat"];
+            xt = Trajectoryx(x.dT, [xt_x xt_y xt_thetat],stateNames, 0);
         end
 
     end

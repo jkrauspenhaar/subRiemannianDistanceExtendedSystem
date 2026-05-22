@@ -56,7 +56,11 @@ I_wcarz_val = mcar_val*(3*Rcar_val^2 + 0.01^2)/12; % wheel inertia around z-axis
 %% articulated vehicle
 M_tractor_val = 40; % chassis in kg
 L_tractor_val = 0.8; % axis length in m
-I_cz_tractor_val = (1.2^2+0.8^2)*M_tractor_val/12; % chassis inertia around z-axis in kg m^2
+% length_tractor_val = 1.2;
+% width_tractor_val = 0.8;
+length_tractor_val = 1.42;
+width_tractor_val = 1.23;
+I_cz_tractor_val = (length_tractor_val^2+width_tractor_val^2)*M_tractor_val/12; % chassis inertia around z-axis in kg m^2
 I_cx_tractor_val = nan;
 I_cy_tractor_val = nan;
 l1_tractor_val = 1;
@@ -73,7 +77,11 @@ Mt_tractor_val = 60; % trailer chassis in kg
 Lt_tractor_val = L_tractor_val; % trailer axis length in m
 I_tx_tractor_val = nan;
 I_ty_tractor_val = nan;
-I_tz_tractor_val = Mt_tractor_val*(1.2^2+0.8^2)/12; % chassis inertia around z-axis in kg m^2
+% lengtht_tractor_val = 1.2;
+% widtht_tractor_val = 0.8;
+lengtht_tractor_val = 1.42;
+widtht_tractor_val = 1.23;
+I_tz_tractor_val = Mt_tractor_val*(lengtht_tractor_val^2+widtht_tractor_val^2)/12; % chassis inertia around z-axis in kg m^2
 l2_tractor_val = 1;
 
 %%
