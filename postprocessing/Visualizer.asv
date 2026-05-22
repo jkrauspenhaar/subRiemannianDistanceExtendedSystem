@@ -309,7 +309,8 @@ classdef Visualizer
             ymin = min([y_robot; y_trailer]) - margin;
             ymax = max([y_robot; y_trailer]) + margin;
         
-            figure();
+            fig = figure('Units','pixels','Position',[100 100 800 600]);
+            set(fig, 'Resize', 'off');
             axis equal;
             axis([xmin xmax ymin ymax]);
             grid on;
@@ -428,7 +429,7 @@ classdef Visualizer
             y_trailer = y_robot - l*sin(theta_robot) - l_t*sin(theta_trailer);
         
             % margins                
-            margin = vehicle.axisLength;
+            margin = 1.5*vehicle.axisLength;
             xmin = min([x_robot; x_trailer]) - margin;
             xmax = max([x_robot; x_trailer]) + margin;
             ymin = min([y_robot; y_trailer]) - margin;
@@ -470,15 +471,9 @@ classdef Visualizer
                 xOffset = 0;
                 p_tralier_shifted = p_trailer + xOffset * [cos(theta_trailer(k)); sin(theta_trailer(k))];
         
-                % robot
-                % set(h_robot, 'Position', [ ...
-                %     p_robot(1) - robot_radius, ...
-                %     p_robot(2) - robot_radius, ...
-                %     2*robot_radius, ...
-                %     2*robot_radius]);
-                % set(h_center_robot, 'XData', p_robot(1), 'YData', p_robot(2));
-
-                robot_xy = obj.orientedRectangle(p_robot, theta_robot(k), robot_length, robot_width);
+                rounding_radius = 0.25 * min(robot_length, robot_width);
+                nArc = 20;
+                robot_xy = obj.orientedRoundedRectangle(p_robot, theta_robot(k), robot_length, robot_width,rounding_radius,nArc);
                 set(h_robot, 'XData', robot_xy(1,:), 'YData', robot_xy(2,:));
                 set(h_center_robot, 'XData', p_robot(1), 'YData', p_robot(2));
                 
@@ -486,7 +481,7 @@ classdef Visualizer
                 set(h_center_G, 'XData', p_G(1), 'YData', p_G(2));
 
                 % trailer
-                trailer_xy = obj.orientedRectangle(p_tralier_shifted, theta_trailer(k), trailer_length, trailer_width);
+                trailer_xy = obj.orientedRoundedRectangle(p_tralier_shifted, theta_trailer(k), trailer_length, trailer_width,rounding_radius,nArc);
                 set(h_trailer, 'XData', trailer_xy(1,:), 'YData', trailer_xy(2,:));
                 set(h_center_trailer, 'XData', p_trailer(1), 'YData', p_trailer(2));
         
@@ -531,40 +526,34 @@ classdef Visualizer
                 corners_rectangle = R * corners_local + center;
         end
 
-        function xy = orientedRoundedRectangle(center, angle, L, W, r, nArc)
-            % center : [2x1] Mittelpunkt
-            % angle  : Orientierung
-            % L, W   : Länge und Breite
-            % r      : Rundungsradius
-            % nArc   : Anzahl Punkte pro Ecke, z.B. 12 oder 20
+        function xy = orientedRoundedRectangle(obj, center, angle, L, W, r, npointsEcke)
         
             r = min(r, min(L,W)/2);
         
-            % lokale Eckzentren der Rundungen
             cx = L/2 - r;
             cy = W/2 - r;
         
-            % Winkelbereiche der vier Ecken
-            a1 = linspace(-pi/2, 0, nArc);      % unten rechts
-            a2 = linspace(0, pi/2, nArc);       % oben rechts
-            a3 = linspace(pi/2, pi, nArc);      % oben links
-            a4 = linspace(pi, 3*pi/2, nArc);    % unten links
+            % corner arcs, each as 2 x nArc
+            a1 = linspace(-pi/2, 0, npointsEcke);       % bottom right
+            a2 = linspace(0, pi/2, npointsEcke);        % top right
+            a3 = linspace(pi/2, pi, npointsEcke);       % top left
+            a4 = linspace(pi, 3*pi/2, npointsEcke);     % bottom left
         
-            pts = [ ...
-                cx + r*cos(a1),  cy + r*sin(a1); ...
-                cx + r*cos(a2),  cy + r*sin(a2); ...
-               -cx + r*cos(a3),  cy + r*sin(a3); ...
-               -cx + r*cos(a4), -cy + r*sin(a4) ...
-            ];
+            p1 = [ cx + r*cos(a1); -cy + r*sin(a1)];
+            p2 = [ cx + r*cos(a2);  cy + r*sin(a2)];
+            p3 = [-cx + r*cos(a3);  cy + r*sin(a3)];
+            p4 = [-cx + r*cos(a4); -cy + r*sin(a4)];
         
-            pts = pts';
+            % complete polygon, size 2 x N
+            pts = [p1 p2 p3 p4];
         
-            % schließen
+            % close polygon
             pts(:,end+1) = pts(:,1);
         
-            % Rotation
             R = [cos(angle), -sin(angle);
                  sin(angle),  cos(angle)];
+        
+            center = center(:);   % ensure 2 x 1
         
             xy = R * pts + center;
         end

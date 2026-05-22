@@ -309,7 +309,8 @@ classdef Visualizer
             ymin = min([y_robot; y_trailer]) - margin;
             ymax = max([y_robot; y_trailer]) + margin;
         
-            figure();
+            fig = figure('Units','pixels','Position',[100 100 800 600]);
+            set(fig, 'Resize', 'off');
             axis equal;
             axis([xmin xmax ymin ymax]);
             grid on;
@@ -434,7 +435,8 @@ classdef Visualizer
             ymin = min([y_robot; y_trailer]) - margin;
             ymax = max([y_robot; y_trailer]) + margin;
         
-            figure();
+            fig = figure('Units','pixels','Position',[100 100 800 600]);
+            set(fig, 'Resize', 'off');
             axis equal;
             axis([xmin xmax ymin ymax]);
             grid on;
@@ -505,7 +507,7 @@ classdef Visualizer
                 drawnow;
                 
                 if save_video
-                    frame = getframe(gcf);
+                    frame = getframe(fig);
                     writeVideo(v, frame);
                 end
 
