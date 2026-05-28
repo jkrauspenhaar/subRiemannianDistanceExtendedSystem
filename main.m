@@ -5,8 +5,8 @@ addpath(genpath(pwd));
 %% user params
 dT = 0.25;
 
-save_results = 1;
-store_git_info = 1;
+save_results = 0;
+store_git_info = 0;
 save_video = 1;
 
 % choose the vehicle
@@ -80,7 +80,7 @@ simulator = Simulator(vehicle.getModel(), dT);
 
 %% MPC
 horizon = 40; %s.t. value function is monotonically decreasing
-quadratic = true;
+quadratic = false;
 mpcController = MPCController(vehicle, dT, horizon, quadratic);
 
 k_sim = 400; %400
@@ -91,7 +91,7 @@ xt = vehicle.compute_xt(x);
 % %% postprocessing
 % % VISUAlIZER
 visualizer = Visualizer();
-% visualizer.animation(x, vehicle, save_video);
+visualizer.animation(x, vehicle, save_video);
 visualizer.plotStates(x);
 visualizer.plotInputs(u);
 visualizer.plotCosts(cost); 
