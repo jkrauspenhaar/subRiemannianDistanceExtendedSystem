@@ -80,7 +80,7 @@ simulator = Simulator(vehicle.getModel(), dT);
 
 %% MPC
 horizon = 28; %28 geht, bei 25 geht nicht
-quadratic = false;
+quadratic = true;
 mpcController = MPCController(vehicle, dT, horizon, quadratic);
 
 k_sim = 400; %400
