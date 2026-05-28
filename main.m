@@ -80,7 +80,7 @@ simulator = Simulator(vehicle.getModel(), dT);
 
 %% MPC
 horizon = 40; %s.t. value function is monotonically decreasing
-quadratic = false;
+quadratic = true;
 mpcController = MPCController(vehicle, dT, horizon, quadratic);
 
 k_sim = 400; %400
