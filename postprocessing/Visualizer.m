@@ -11,41 +11,22 @@ classdef Visualizer
             % end
             % obj.System = system;
         % end
-
-        % Zustände plotten
-        function plotStates(obj, xTraj)
-            T = xTraj.timeGrid();
-            X = xTraj.X;
-            nx = xTraj.stateDimension();
+        
+        function plotTrajectory(obj, Traj)
+            T = Traj.timeGrid();
+            X = Traj.data;
+            n = Traj.dimension();
 
             figure();
-            for j = 1:nx
-                subplot(nx,1,j);
+            for j = 1:n
+                subplot(n,1,j);
                 plot(T,X(:,j));
                 xlabel('t');
-                ylabel(xTraj.stateNames(j));
+                ylabel(Traj.names(j));
                 grid on;
             end  
-            sgtitle('state trajectories');
-        end
-
-        % Inputs plotten
-        function plotInputs(obj, uTraj)
-            T = uTraj.timeGrid();
-            U = uTraj.U();
-            nu = uTraj.inputDimension();
-
-            figure();
-            for j = 1:nu
-                subplot(nu,1,j);
-                plot(T,U(:,j));
-                xlabel('t');
-                ylabel(uTraj.inputNames(j));
-                grid on;
-            end  
-            sgtitle('input trajectories');
-        end
-
+            sgtitle(Traj.title);
+        end    
        
         % XY-diagram plotten
         function plotPath(obj, xTraj, idxX, idxY)
@@ -54,14 +35,14 @@ classdef Visualizer
                 idxY = 2;
             end
 
-            X = xTraj.X();
+            X = xTraj.data();
 
             figure;
             plot(X(:,idxX), X(:,idxY), 'LineWidth', 2);
             grid on;
             axis equal;
-            xlabel(xTraj.stateNames(1));
-            ylabel(xTraj.stateNames(2));
+            xlabel(xTraj.names(1));
+            ylabel(xTraj.names(2));
             title('x-y diagram');
         end
 
@@ -77,20 +58,8 @@ classdef Visualizer
                     obj.animation_articulatedVehicle(trajectoryx, vehicle,save_video)
                 end
             end            
-        end     
-            
-      
-        % Kosten plotten
-        function plotCosts(obj, cost)
-            T = cost.timeGrid();
-            cost_data = cost.getCost();
-            figure();
-            semilogy(T,cost_data);
-            xlabel('t');
-            ylabel('cost');
-            grid on;
-            sgtitle('value function');
-        end       
+        end                  
+     
 
 
     end
@@ -399,7 +368,7 @@ classdef Visualizer
                 open(v);
             end
 
-            x = trajectoryx.X;          
+            x = trajectoryx.data;          
 
             x_robot = x(:,1);
             y_robot = x(:,2);

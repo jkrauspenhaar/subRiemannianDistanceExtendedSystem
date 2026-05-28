@@ -183,12 +183,12 @@ classdef ArticulatedVehicleCollapsed
         end
 
         function xt = compute_xt(obj,x)
-            xt_thetat = x.X(:,3)-x.X(:,4); %gamma=theta-theta_T --> theta_T = theta-gamma
-            xt_x = x.X(:,1)-obj.l*cos(x.X(:,3))-obj.l_t*cos(xt_thetat);
-            xt_y = x.X(:,2)-obj.l*sin(x.X(:,3))-obj.l_t*sin(xt_thetat);
+            xt_thetat = x.data(:,3)-x.data(:,4); %gamma=theta-theta_T --> theta_T = theta-gamma
+            xt_x = x.data(:,1)-obj.l*cos(x.data(:,3))-obj.l_t*cos(xt_thetat);
+            xt_y = x.data(:,2)-obj.l*sin(x.data(:,3))-obj.l_t*sin(xt_thetat);
 
             stateNames = ["xt" "yt" "thetat"];
-            xt = Trajectoryx(x.dT, [xt_x xt_y xt_thetat],stateNames, 0);
+            xt = Trajectory(x.dT, [xt_x xt_y xt_thetat],stateNames, '2nd body states');
         end
 
     end

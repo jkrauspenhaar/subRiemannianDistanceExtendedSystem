@@ -52,10 +52,10 @@ classdef Simulator
                 x_data(kk+1,:) = xcurrent;
                 cost_data(kk) = sol.Jval;
             end
-            x = Trajectoryx(obj.dT, x_data, obj.Model.stateNames);
-            u = Trajectoryu(obj.dT, u_data, obj.Model.inputNames);
-            cost = Trajectorycost(obj.dT,cost_data);
-            compTime = Trajectoryx(obj.dT, computationTime_data, "computationTime");
+            x = Trajectory(obj.dT, x_data, obj.Model.stateNames, 'state');
+            u = Trajectory(obj.dT, u_data, obj.Model.inputNames, 'input');
+            cost = Trajectory(obj.dT,cost_data, "cost", 'cost');
+            compTime = Trajectory(obj.dT, computationTime_data, "computationTime", 'computationTime');
         end
 
         function outputTrajectory = simulate(obj, x0, inputTrajectory)
@@ -73,12 +73,12 @@ classdef Simulator
             xk = x0(:);
 
             for k = 1:N
-                uk = inputTrajectory.U(k,:);
+                uk = inputTrajectory.data(k,:);
                 xk = obj.simstep(xk, uk');
                 X(k+1,:) = xk.';
             end
 
-            outputTrajectory = Trajectoryx(obj.dT,X,obj.Model.stateNames);
+            outputTrajectory = Trajectory(obj.dT,X,obj.Model.stateNames,'state');
         end
 
         function xNext = simstep(obj, x, u)

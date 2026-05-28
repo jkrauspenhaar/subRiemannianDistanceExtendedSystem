@@ -74,7 +74,7 @@ simulator = Simulator(vehicle.getModel(), dT);
 % % U_data = repmat([0.00003 0], 100, 1);
 % U_data = repmat([0 0.00005], 100, 1); %Gelenk wird aktuiert in positive Richtung
 % % U_data = repmat([-0.00003 -0.0001], 100, 1); %gegensätzliche Bewegung
-% u = Trajectoryu(dT, U_data,vehicle.getModel().inputNames, 0);
+% u = Trajectory(dT, U_data,vehicle.getModel().inputNames, 'input');
 % x = simulator.simulate(x0, u);
 
 
@@ -83,7 +83,7 @@ horizon = 40; %s.t. value function is monotonically decreasing
 quadratic = false;
 mpcController = MPCController(vehicle, dT, horizon, quadratic);
 
-k_sim = 400; %400
+k_sim = 4; %400
 [x,u,cost,compTime] = simulator.sim_MPC_closedLoop(x0, k_sim,mpcController);
 xt = vehicle.compute_xt(x);
 % max(diff(cost.cost))
@@ -92,10 +92,10 @@ xt = vehicle.compute_xt(x);
 % % VISUAlIZER
 visualizer = Visualizer();
 visualizer.animation(x, vehicle, save_video);
-visualizer.plotStates(x);
-visualizer.plotInputs(u);
-visualizer.plotCosts(cost); 
-visualizer.plotStates(compTime);
+visualizer.plotTrajectory(x);
+visualizer.plotTrajectory(u);
+visualizer.plotTrajectory(cost); 
+visualizer.plotTrajectory(compTime);
 % visualizer.plotPath(x);
 
 %% store results

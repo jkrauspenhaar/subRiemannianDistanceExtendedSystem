@@ -11,6 +11,22 @@ classdef Visualizer
             % end
             % obj.System = system;
         % end
+        
+        function plotTrajectory(obj, Traj)
+            T = Traj.timeGrid();
+            X = Traj.data;
+            n = Traj.dimension();
+
+            figure();
+            for j = 1:n
+                subplot(n,1,j);
+                plot(T,X(:,j));
+                xlabel('t');
+                ylabel(Traj.staames(j));
+                grid on;
+            end  
+            sgtitle(Traj.title);
+        end
 
         % Zustände plotten
         function plotStates(obj, xTraj)
@@ -399,7 +415,7 @@ classdef Visualizer
                 open(v);
             end
 
-            x = trajectoryx.X;          
+            x = trajectoryx.data;          
 
             x_robot = x(:,1);
             y_robot = x(:,2);
@@ -435,7 +451,8 @@ classdef Visualizer
             ymin = min([y_robot; y_trailer]) - margin;
             ymax = max([y_robot; y_trailer]) + margin;
         
-            figure();
+            fig = figure('Units','pixels','Position',[100 100 800 600]);
+            set(fig, 'Resize', 'off');
             axis equal;
             axis([xmin xmax ymin ymax]);
             grid on;
@@ -506,7 +523,7 @@ classdef Visualizer
                 drawnow;
                 
                 if save_video
-                    frame = getframe(gcf);
+                    frame = getframe(fig);
                     writeVideo(v, frame);
                 end
 
