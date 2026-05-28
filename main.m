@@ -79,8 +79,8 @@ simulator = Simulator(vehicle.getModel(), dT);
 
 
 %% MPC
-horizon = 28; %28 geht, bei 25 geht nicht
-quadratic = true;
+horizon = 40; %s.t. value function is monotonically decreasing
+quadratic = false;
 mpcController = MPCController(vehicle, dT, horizon, quadratic);
 
 k_sim = 400; %400
@@ -91,7 +91,7 @@ xt = vehicle.compute_xt(x);
 % %% postprocessing
 % % VISUAlIZER
 visualizer = Visualizer();
-visualizer.animation(x, vehicle, save_video);
+% visualizer.animation(x, vehicle, save_video);
 visualizer.plotStates(x);
 visualizer.plotInputs(u);
 visualizer.plotCosts(cost); 
