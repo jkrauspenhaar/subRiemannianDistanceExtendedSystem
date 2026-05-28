@@ -21,7 +21,7 @@ classdef Simulator
             obj.Method = string(method);
         end
 
-        function [x,u,cost] = sim_MPC_closedLoop(obj,xcurrent, k_sim,mpcController)
+        function [x,u,cost,compTime] = sim_MPC_closedLoop(obj,xcurrent, k_sim,mpcController)
             nx = obj.Model.nx;
             nu = obj.Model.nu;
 
@@ -31,12 +31,14 @@ classdef Simulator
             u_data = zeros(k_sim,nu);
             cost_data =zeros(k_sim,1);
             flag_accuracy = 0;
+            computationTime_data = zeros(k_sim,1);
             for kk = 1:k_sim
                 if mod(kk,25) == 0
                     kk
                 end
                 %compute input
-                [u0, sol] = mpcController.computeInput(xcurrent, y_init);
+                [u0, sol, computationTime] = mpcController.computeInput(xcurrent, y_init);
+                computationTime_data(kk) = computationTime;
                 u_data(kk,:) = u0;
                 y_init = mpcController.initialGuess(sol);
                 %apply input
@@ -53,6 +55,7 @@ classdef Simulator
             x = Trajectoryx(obj.dT, x_data, obj.Model.stateNames);
             u = Trajectoryu(obj.dT, u_data, obj.Model.inputNames);
             cost = Trajectorycost(obj.dT,cost_data);
+            compTime = Trajectoryx(obj.dT, computationTime_data, "computationTime");
         end
 
         function outputTrajectory = simulate(obj, x0, inputTrajectory)

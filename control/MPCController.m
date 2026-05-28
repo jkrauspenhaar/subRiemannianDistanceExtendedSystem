@@ -12,6 +12,7 @@ classdef MPCController
         Constraints
         angle_diff_max
         quadratic
+        freqCL        
     end
 
     methods
@@ -69,14 +70,18 @@ classdef MPCController
         
             obj.ySym = y;
             obj.solver = solver_;
+
+            %measure computation time
+            obj.freqCL = robotics.Rate(1/obj.dT);
+            reset(obj.freqCL);
         end
 
-        function [u0, sol] = computeInput(obj, x0, y_init)
-            sol = obj.solve(x0, y_init);
+        function [u0, sol, computationTime] = computeInput(obj, x0, y_init)
+            [sol, computationTime] = obj.solve(x0, y_init);
             u0 = sol.u(1:2,:);
         end
 
-        function sol = solve(obj, x0, y_init)       
+        function [sol, computationTime] = solve(obj, x0, y_init)       
             nx = obj.Model.nx;
             nu = obj.Model.nu;
             N  = obj.horizon;
@@ -91,7 +96,12 @@ classdef MPCController
             lb(1:nx) = x0;									
             ub(1:nx) = x0; %initial condition
 
+            time_Before_OCP = obj.freqCL.TotalElapsedTime;
+
             res = obj.solver('x0', y_init,'lbx', lb, 'ubx', ub, 'lbg', obj.con_lb, 'ubg', obj.con_ub);
+
+            time_After_OCP = obj.freqCL.TotalElapsedTime;
+            computationTime = time_After_OCP - time_Before_OCP;
           
             if ~(obj.solver.stats.success)
                 warning('OCP not solved successfully.')
@@ -180,14 +190,14 @@ classdef MPCController
                 runningcosts = 0;
                 % states
                 for j=1:nx
-                    if mod(d/r(j),2) == 0
-                        if obj.quadratic == true
-                            runningcosts = runningcosts + q_z(j)*x_k(j)^2;
-                        else
-                            runningcosts = runningcosts + q_z(j)*(z(j,:)*x_k)^(d/r(j));
-                        end
+                    if obj.quadratic == true
+                       runningcosts = runningcosts + q_z(j)*x_k(j)^2;
                     else
-                        runningcosts = runningcosts + q_z(j)*(abs(z(j,:)*x_k))^(d/r(j));
+                        if mod(d/r(j),2) == 0                        
+                           runningcosts = runningcosts + q_z(j)*(z(j,:)*x_k)^(d/r(j));                        
+                        else
+                            runningcosts = runningcosts + q_z(j)*(abs(z(j,:)*x_k))^(d/r(j));
+                        end
                     end
                 end
                 % inputs
