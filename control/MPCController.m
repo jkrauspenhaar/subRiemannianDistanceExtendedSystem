@@ -11,11 +11,12 @@ classdef MPCController
         Model
         Constraints
         angle_diff_max
+        quadratic
     end
 
     methods
-        function obj = MPCController(vehicle, dT, horizon, solverOptions)
-            if nargin < 4              
+        function obj = MPCController(vehicle, dT, horizon, quadratic, solverOptions)
+            if nargin < 5              
                 solverOptions.opts.ipopt.print_level = 0;
                 solverOptions.opts.print_time = false;
                 solverOptions.solver_ = 'ipopt';
@@ -29,6 +30,7 @@ classdef MPCController
             obj.dT = dT;
             obj.horizon = horizon;
             obj.solverOptions = solverOptions;
+            obj.quadratic = quadratic;
             obj.Model = vehicle.getModel();
 
             if isa(vehicle, 'Trailer') %0 \leq abs(theta-theta_trailer) < 90deg
@@ -164,17 +166,12 @@ classdef MPCController
             q_z = obj.Model.CostParameters.q_z;
             q_u = obj.Model.CostParameters.q_u;
             z = obj.Model.CostParameters.z;
-            r = obj.Model.CostParameters.r;
             d = obj.Model.CostParameters.d;
-            
-            % %debugging:
-            % x = [0.1 0 0 0 0 0 0.1 0 0 0 0 0 ]' %bsp für z1
-            % x = [0 0 0.1 0 0 0 0 0 0.1 0 0 0 ]' %bsp für z2
-            % x = [0 0.1 0 0.1 0 0 0 0.1 0 0.1 0 0 ]' %bsp für z3
-            % % x = [0 0.1 0 0 0 0 0 0.1 0 0 0 0 ]' %bsp für z4
-            % u =zeros(1,4)
-            % N=2
-            % objective = 0
+            r = obj.Model.CostParameters.r;
+            if obj.quadratic == true
+                q_z = [0.1 5 5 0.1 0 0 0.125*ones(1,2)]'; 
+            end
+
             for k=1:N
                 x_k=x(nx*(k-1)+1:nx*k);                   % state cost in time step k
                 u_k=u(nu*(k-1)+1:nu*k);                   % input cost in time step k
@@ -184,7 +181,11 @@ classdef MPCController
                 % states
                 for j=1:nx
                     if mod(d/r(j),2) == 0
-                        runningcosts = runningcosts + q_z(j)*(z(j,:)*x_k)^(d/r(j));
+                        if obj.quadratic == true
+                            runningcosts = runningcosts + q_z(j)*x_k(j)^2;
+                        else
+                            runningcosts = runningcosts + q_z(j)*(z(j,:)*x_k)^(d/r(j));
+                        end
                     else
                         runningcosts = runningcosts + q_z(j)*(abs(z(j,:)*x_k))^(d/r(j));
                     end

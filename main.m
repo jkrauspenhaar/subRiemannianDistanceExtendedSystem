@@ -80,14 +80,14 @@ simulator = Simulator(vehicle.getModel(), dT);
 
 
 %% MPC
-horizon = 100; %150
-mpcController = MPCController(vehicle, dT, horizon);
+horizon = 50; %50 geht, bei 45 geht nicht
+quadratic = true;
+mpcController = MPCController(vehicle, dT, horizon, quadratic);
 
 k_sim = 400; %400
 [x,u,cost] = simulator.sim_MPC_closedLoop(x0, k_sim,mpcController);
 xt = vehicle.compute_xt(x);
-figure();
-plot(xt.X(:,1),xt.X(:,2))
+% max(diff(cost.cost))
 
 % %% postprocessing
 % % VISUAlIZER
