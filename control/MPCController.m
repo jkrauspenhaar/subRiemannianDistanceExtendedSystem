@@ -58,6 +58,10 @@ classdef MPCController
             N  = obj.horizon;
         
             y = SX.sym('y', nx*(N+1)+N*nu);
+
+            % K = Psi_y*pinv(Psi_x);
+            % 
+            % K=2*K+y;
             
             %system dynamics
             con = obj.nonlinearConstraints(y);
@@ -227,3 +231,5 @@ classdef MPCController
 
     end
 end
+
+

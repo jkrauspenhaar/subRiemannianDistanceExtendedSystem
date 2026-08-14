@@ -312,12 +312,12 @@ G_y_subs_no_time_v_omega = G_y_subs_no_time_v_omega; % do not consider wheel ang
 G_y_func_v_omega = matlabFunction(G_y_subs_no_time_v_omega, 'Vars', {y_});
 M_eqM_func_vw = matlabFunction(M_eqM_subs_no_time*A_Dphi_to_v, 'Vars', {y_});
 Minv_eqM_func_vw = matlabFunction(inv(A_Dphi_to_v)*Minv_eqM_subs_no_time, 'Vars', {y_});
-
+q_eqM_func_vw = matlabFunction(A_Dphi_to_v'*q_eqM_subs_no_time, 'Vars', {x_u_});
 
 disp('Scucessfully computed the equations of motion for Diana...');
 
 % store the handles
-save('results/EqM_Diana.mat', 'M_eqM_func','M_eqM_func_vw','Minv_eqM_func','Minv_eqM_func_vw','k_eqM_func', 'q_eqM_func','G_y_func','G_y_func_v_omega',...
+save('results/EqM_Diana.mat', 'M_eqM_func','M_eqM_func_vw','Minv_eqM_func','Minv_eqM_func_vw','q_eqM_func_vw','k_eqM_func', 'q_eqM_func','G_y_func','G_y_func_v_omega',...
     'y_','s_','x_','x_u_');
 disp('Scucessfully exported the equations of motion for Diana to function handles...');
 

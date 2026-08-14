@@ -3,11 +3,11 @@ close all;
 addpath(genpath(pwd));
 
 %% user params
-dT = 0.25;
+dT = 0.25; %0.25
 
 save_results = 0;
 store_git_info = 0;
-save_video = 0;
+save_video = 1;
 
 % choose the vehicle
 vehicle = ArticulatedVehicleCollapsed('artVeh',true); %true for tractor
@@ -79,23 +79,24 @@ simulator = Simulator(vehicle.getModel(), dT);
 
 
 %% MPC
-horizon = 40; %40s.t. value function is monotonically decreasing
-quadratic = true;
+horizon = 40; %80
+quadratic = false;
 mpcController = MPCController(vehicle, dT, horizon, quadratic);
 
 k_sim = 400; %400
 [x,u,cost,compTime] = simulator.sim_MPC_closedLoop(x0, k_sim,mpcController);
-xt = vehicle.compute_xt(x);
+% xt = vehicle.compute_xt(x);
 % max(diff(cost.cost))
 
 % %% postprocessing
 % % VISUAlIZER
 visualizer = Visualizer();
-visualizer.animation(x, vehicle, save_video);
-visualizer.plotTrajectory(x);
+% visualizer.animation(x, vehicle, save_video);
+visualizer.animationAndCost(x, cost, vehicle, save_video);
+% visualizer.plotTrajectory(x);
 visualizer.plotTrajectory(u);
 visualizer.plotTrajectory(cost); set(gca, 'YScale', 'log');
-visualizer.plotTrajectory(compTime);
+% visualizer.plotTrajectory(compTime);
 % visualizer.plotPath(x);
 
 %% store results

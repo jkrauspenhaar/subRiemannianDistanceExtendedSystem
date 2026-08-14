@@ -11,6 +11,8 @@ n=4;
 
 %% Erstellen von X1 und X2
 L1=sym('L1','real');
+L1 = 1
+
 syms x1 x2 x3 x4;
 
 %Erstellen von X1
