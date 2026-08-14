@@ -67,6 +67,8 @@ function animation_articulatedVehicleTractorAndCost(obj,trajectoryx, cost, vehic
     time_array = cost.timeGrid();
     set(ax2, 'YScale', 'log');
     axis(ax2, [time_array(1) time_array(end) 1e-19 1e3]);
+    ax2.XTick = [40 80]
+    ax2.XTickLabel = {'40', '80'};
     ax2.YTick = [1e-15 1e-10 1e-5 1]
     ax2.YTickLabel = {'10^{-15}', '10^{-10}', '10^{-5}', '1', '10^{5}'};
 
