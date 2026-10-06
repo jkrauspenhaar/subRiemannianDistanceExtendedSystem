@@ -68,8 +68,9 @@ classdef Robot
             %% Dynamics
             stateNames = ["x" "y" "theta" "phi_l" "phi_l_dot" "phi_r_dot"];
             inputNames = ["tau_l" "tau_r"];
-            f_kin = @(y,u) data.G_y_func(y) * [y(5);y(6)];            
-            f = @(y,u) [f_kin(y,u);data.Minv_eqM_func(y)*data.q_eqM_func([y; u])];
+            f_kin = @(y,u) data.G_y_func(y(1:4)) * [y(5);y(6)];
+            % f = @(y,u) [f_kin(y,u);data.Minv_eqM_func(y)*data.q_eqM_func([y; u])];
+            f = @(y,u) [f_kin(y,u);data.Minv_eqM_func(y)*(data.q_eqM_func([y; u])-data.k_eqM_func(y))];
             uMax = 0.02*ones(2,1);
             uMin = -uMax;
             nx = 6;
@@ -85,8 +86,11 @@ classdef Robot
 
             stateNames = ["x" "y" "theta" "phi_l" "v" "w"];
             inputNames = ["tau_l" "tau_r"];
-            f_kin = @(y,u) data.G_y_func_v_omega(y) * [y(5);y(6)];            
-            f = @(y,u) [f_kin(y,u);data.Minv_eqM_func_vw(y)*data.q_eqM_func_vw([y; u])];
+            f_kin = @(y,u) data.G_y_func_v_omega(y(1:4)) * [y(5);y(6)];            
+            % f = @(y,u) [f_kin(y,u);data.Minv_eqM_func_vw(y)*data.q_eqM_func_vw([y; u])];
+            f = @(y,u) [f_kin(y,u);data.Minv_eqM_func_vw(y)*(data.q_eqM_func_vw([y; u])-data.k_eqM_func_vw(y))];
+            %in k stecken nur Zustände und Geschwindigkeiten d.h. Zustand,
+            %da input die tau's sind
             uMax = 0.02*ones(2,1);
             uMin = -uMax;
             nx = 6;

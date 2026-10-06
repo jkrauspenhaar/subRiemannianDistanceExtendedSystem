@@ -117,9 +117,9 @@ A_y = simplify([a1; a2; a2b]);
 
 % explicit kinematics
 % position of the middle point on the axle
-r_m_P = [xc;...
-    yc ;
-    h];
+r_m_P = [xc;
+         yc;
+         h];
 v_m_P = simplify(diff(r_m_P, t));
 s_formula = formula(s);
 v_m_P_phi = simplify(subs(v_m_P, diff(theta(t),t), R*(s_formula(2) - s_formula(1))/L));
@@ -308,10 +308,9 @@ q_eqM_func = matlabFunction(q_eqM_subs_no_time, 'Vars', {x_u_});
 % trafo to v and omega
 A_Dphi_to_v = (1/robot.R)*[1 -0.5*robot.L; 1 0.5*robot.L];
 G_y_subs_no_time_v_omega = G_y_subs_no_time*A_Dphi_to_v;
-G_y_subs_no_time_v_omega = G_y_subs_no_time_v_omega; % do not consider wheel angle
 G_y_func_v_omega = matlabFunction(G_y_subs_no_time_v_omega, 'Vars', {y_});
-M_eqM_func_vw = matlabFunction(M_eqM_subs_no_time*A_Dphi_to_v, 'Vars', {y_});
-Minv_eqM_func_vw = matlabFunction(inv(A_Dphi_to_v)*Minv_eqM_subs_no_time, 'Vars', {y_});
+M_eqM_func_vw = matlabFunction(A_Dphi_to_v'*M_eqM_subs_no_time*A_Dphi_to_v, 'Vars', {y_});
+Minv_eqM_func_vw = matlabFunction(inv(A_Dphi_to_v'*M_eqM_subs_no_time*A_Dphi_to_v), 'Vars', {y_});
 q_eqM_func_vw = matlabFunction(A_Dphi_to_v'*q_eqM_subs_no_time, 'Vars', {x_u_});
 
 disp('Scucessfully computed the equations of motion for Diana...');

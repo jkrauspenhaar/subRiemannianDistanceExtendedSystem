@@ -10,10 +10,10 @@ store_git_info = 0;
 save_video = 1;
 
 % choose the vehicle
-vehicle = ArticulatedVehicleCollapsed('artVeh',true); %true for tractor
+% vehicle = ArticulatedVehicleCollapsed('artVeh',true); %true for tractor
 % vehicle = ArticulatedVehicle('artVeh');
 % vehicle = Trailer('trailer');
-% vehicle = Robot('DIANA');
+vehicle = Robot('DIANA');
 
 % choose the model
 % modelname = 'kinematics_vw';
@@ -80,10 +80,10 @@ simulator = Simulator(vehicle.getModel(), dT);
 
 %% MPC
 horizon = 40; %80
-quadratic = true;
+quadratic = false;
 mpcController = MPCController(vehicle, dT, horizon, quadratic);
 
-k_sim = 400; %400
+k_sim = 50; %400
 [x,u,cost,compTime] = simulator.sim_MPC_closedLoop(x0, k_sim,mpcController);
 % xt = vehicle.compute_xt(x);
 % max(diff(cost.cost))
