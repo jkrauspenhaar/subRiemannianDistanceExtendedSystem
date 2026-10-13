@@ -22,6 +22,17 @@ I_wx_val = m_val*(3*R_val^2 + 0.005^2)/12; % wheel inertia around x-axis in kg m
 I_wy_val = 0.5*m_val*R_val^2;
 I_wz_val = m_val*(3*R_val^2 + 0.005^2)/12; % wheel inertia around z-axis in kg m^2
 
+% two different wheels
+R_1_val = R_val;
+I_wx_1_val = m_val*(3*R_1_val^2 + 0.005^2)/12; % wheel inertia around x-axis in kg m^2
+I_wy_1_val = 0.5*m_val*R_1_val^2;
+I_wz_1_val = m_val*(3*R_1_val^2 + 0.005^2)/12; % wheel inertia around z-axis in kg m^2
+
+R_2_val = R_val*1.1;
+I_wx_2_val = m_val*(3*R_2_val^2 + 0.005^2)/12; % wheel inertia around x-axis in kg m^2
+I_wy_2_val = 0.5*m_val*R_2_val^2;
+I_wz_2_val = m_val*(3*R_2_val^2 + 0.005^2)/12; % wheel inertia around z-axis in kg m^2
+
 % trailer
 b1x_val = 0.195;%0.195; % hook length in m
 Mt_val = 0.43; % trailer chassis in kg
